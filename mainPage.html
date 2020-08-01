@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Home</title>
+        
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+
+        <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-storage.js"></script>
+        
+    </head>
+<body class="h-100">
+
+    <nav class="navbar navbar-expand-lg bg-dark text-white">
+        <div class="container-fluid">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a class="navbar-brand" style="color: whitesmoke; text-decoration-style: wavy;" href="#">
+                       Wanted App  
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" style="color: whitesmoke; text-decoration-style: wavy;" href="#">
+                       <span style="color: white;">Home</span>  
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" style="color: whitesmoke; text-decoration-style: wavy;" href="#">
+                       <span style="color: white;"></span>My Criminals</span>
+                    </a>
+                </li>
+            </ul>
+           
+        </div>
+    </nav>
+
+    <div class="row h-100 bg-light">
+        <div class="col-lg-0 bg-secondary">
+            <ul class="nav flex-column">
+
+            </ul>
+        </div>
+        <div class="col-lg-12">
+            <div class="container" id="container">
+                <div class="jumbotron bg-dark" style="margin-top: 15px;;">
+                    <script>
+                        var counter = 0;
+                    </script>
+                    <div class="container text-center">
+                        <form id="main-form">
+
+
+
+                        <div class="form-group">
+                            <textarea type="text" rows="5" placeholder="Description..." class="form-control" id="main-desc"></textarea>
+                            <div class="invalid-feedback">
+                                Please fill the form first.
+                            </div>
+                        </div>
+
+
+
+                            <div class="form-group">
+                                <input type="file" class="form-control" id="main-image" />
+                                <div class="invalid-feedback">
+                                    Please choose a valid picture.
+                                </div>
+                            </div> 
+                            <div class="form-group">
+                                <img id="selected-image" width="250" height="150" src="#" />
+                            </div>
+                            <div class="form-group">
+                                <div class="progress bg-secondary">
+                                    <div class="progress-bar bg-success" id="upload-progress" style="width: 0%;">0%</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button id="save-blog" type="button" style="width: 150px; height: 60px;" class="btn btn-light bg-light text-dark">Post</button>
+                            </div>
+                        </form>
+                        <div id="result">
+
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+                <br><br><br>
+                <div class="text-center bg-light text-dark">
+                    <h3>All New Photos</h3>
+                </div>
+
+                <hr>
+                <br>
+
+                <div class="row container-fluid bg-3">
+                    <div class="col-sn-12" id="blogs">
+
+                    </div>
+                </div>
+
+                <br>
+
+                <script>
+                    var validImagetypes = ["image/gif", "image/jpeg", "image/png"];
+
+                    $("#selected-image").hide();
+
+                    function previewImage(image){
+                        if(image.files && image.files[0]){
+                            var reader = new FileReader();
+
+                            reader.onload = function(e){
+                                $("#selected-image").attr('src', e.target.result);
+                                $("#selected-image").show();
+                            }
+                            reader.readAsDataURL(image.files[0]);
+                        }
+                        $("#selected-image").show();
+                    }
+                    $("#main-image").change(function(){
+                        previewImage(this);
+                    });
+                    $("#save-blog").click(function(){
+                        $("#main-desc").removeClass("is-invalid");
+                        $("#main-image").removeClass("is-invalid");
+
+                        var desc = $("#main-desc").val();
+                        var picture = $("#main-image").prop("files")[0];
+
+                        if(!desc){
+                            $("#main-desc").addClass("is-invalid");
+                            return;
+                        }
+                        if(picture === null){
+                            $("#main-image").addClass("is-invalid");
+                            return;
+                        }
+                        if($.inArray(picture["type"], validImagetypes)<0){
+                            $("#main-image").addClass("is-invalid");
+                            return;
+                        }
+                      
+                        var databaseRef = firebase.database().child("Criminals");
+
+                        databaseRef.once("value").then(function(){
+                            var name = picture["name"];
+                        
+                            var storageRef = firebase.storage().ref(picture.value());
+                            var photoRef = storageRef.child(name);
+
+                            var uploadTask = photoRef.put(picture);
+
+                            uploadTask.on("state_changed", 
+                                function progress(snapshot){
+                                    var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                                    $("#upload-progress").html(Math.round(percentage) + "%");
+                                    $("#upload-progress").attr("style", "width:" + percentage + "%");
+                                },
+                                function complete(){
+                                    uploadTask.snapshot.ref.getDownloadURL().then(function(downloadUrl){
+                                        var time = new Date();
+
+                                        var options={
+                                            weekday: "long",
+                                            month: "long",
+                                            day: "2-digit",
+                                            year: "numeric",
+                                        };
+
+                                        var photoData = {
+                                            "image": downloadUrl,
+                                            "name": name,
+                                            "desc": desc,
+                                            "time": time.toLocaleString('en-US', {hour:'numeric', minute:'numeric', hour12: true}),
+                                            "date": time.toLocaleDateString('en-US', options)
+                                        };
+                                        var newPostRef = databaseRef.push();
+
+                                        newPostRef.set(photoData, function(err){
+                                            if(err){
+                                                $("#result").attr("class", "alert alert-danger");
+                                                $("#result").html(err.message);
+                                            }
+                                            else{
+                                                $("#result").attr("class", "alert alert-success");
+                                                $("#result").html("Photo has been uploaded successfully.");  
+
+                                                window.open("", "_self"); 
+                                            }
+                                        });
+                                    });
+                                }
+                              
+                            );
+                        });
+                    });
+
+                    function resetForm(){
+                        $("#main-form")[0].reset();
+                        $("#selected-image").fadeOut();
+                        $("#upload-progress").html("Completed");
+                    }
+
+                </script>
+
+            </div>
+        </div>
+    </div>
+
+   <script src="index.html"></script>
+   <script>
+     //  firebase.auth().onAuthStateChanged(function(user)
+      // {
+        //   if(!user){
+        //       window.location.href= "signin.html";
+        //   } 
+      //  });
+   </script>
+</body>
+</html>

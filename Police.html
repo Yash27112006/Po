@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Wanted</title>
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.sound.min.js"></script>
+        <script src="p5.play.js"></script>
+    
+    
+        <script src="js/Player.js"></script>
+        <script src="js/Form.js"></script>
+        <script src="Thief.js"></script>
+        <script src="js/Game.js"></script>
+        <script src="Mail.js"></script>
+        <script src="Upload.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+    
+      </head>
+    <body>
+        <style> 
+              img{ height: 200px; width: 200px; border: 2px solid Black;} 
+        </style>Image Name
+        <input id="namebox" type="text"><br><br>
+        <img id="myimg"> <label id="upProgress"></label><br><br>
+
+        <button id="select">Select Image</button> 
+        <button id="upload">Upload Image</button> 
+        <button id="retrieve">Retrieve Image</button>
+
+        <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js"></script> 
+        <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-storage.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
+
+        <script id = "MainScript">
+           var ImgName, ImgUrl;
+           var files = [];
+           var  reader = new FileReader ();
+
+        var firebaseConfig = {
+            apiKey: "AIzaSyCzwO7oMHN4KMpWIDU0FUUZu7OCEjb7ekI",
+            authDomain: "wanted-24a64.firebaseapp.com",
+            databaseURL: "https://wanted-24a64.firebaseio.com",
+            projectId: "wanted-24a64",
+            storageBucket: "wanted-24a64.appspot.com",
+            messagingSenderId: "56215061520",
+            appId: "1:56215061520:web:55cbfbd79eb8bce21d7695"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        document.getElementById("select").onClick = function(e){
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.click();
+        }
+
+        </script>
+
+
+    </body>
+</html>
